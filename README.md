@@ -6,7 +6,7 @@
 
 <h2 style="margin-bottom: 0.5rem">Deployment Link 📦</h2>
 
-🌐 **Explore it here**: [https://rbac-frontend-alpha.vercel.app/](https://rbac-frontend-alpha.vercel.app/)
+🌐 **Explore it here**: [https://rbac-frontend-rahul4507s-projects.vercel.app/](https://rbac-frontend-rahul4507s-projects.vercel.app/)
 <h2 style="margin-bottom: 0.5rem">Features 🔥</h2>
 
 Here are some of the project's best features:
