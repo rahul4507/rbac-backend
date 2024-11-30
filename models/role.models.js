@@ -1,31 +1,35 @@
+const mongoose = require("mongoose");
 
-const mongoose = require('mongoose');
-
-const roleSchema = new mongoose.Schema({
+const roleSchema = new mongoose.Schema(
+  {
     name: {
-        type: String,
-        required: [true, 'Please provide role name'],
+      type: String,
+      required: [true, "Please provide role name"],
     },
     role: {
-        type: String,
-        required: [true, 'Please provide role'],
+      type: String,
+      required: [true, "Please provide role"],
     },
     is_active: {
-        type: Boolean,
-        default: true,
+      type: Boolean,
+      default: true,
     },
-    permissions: {
-        type: [String],
-        default: []
+    modules: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Module",
+      },
+    ],
+    description: {
+      type: String,
+      default: "",
     },
-    remarks: {
-        type: String,
-        default: ''
-    }
-}, {
-    timestamps: true
-});
+  },
+  {
+    timestamps: true,
+  }
+);
 
-const Role = mongoose.model('Role', roleSchema);
+const Role = mongoose.model("Role", roleSchema);
 
 module.exports = Role;
