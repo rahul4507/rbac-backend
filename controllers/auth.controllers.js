@@ -56,3 +56,18 @@ exports.login = async (req, res) => {
     });
   }
 };
+
+exports.logout = (req, res) => {
+  // A logout operation in a JWT-based system is usually done by removing the token
+  // from the client side (like localStorage or cookies). On the server side,
+  // we don't need to do much unless you implement token blacklisting or store the sessions.
+
+  // If you're storing JWT in cookies (e.g., HTTPOnly cookies), you could clear the cookie here.
+  res.clearCookie("jwt"); // Clear the cookie, if you're using cookies to store JWT
+
+  // Send a response to confirm the logout
+  res.status(200).json({
+    status: "success",
+    message: "Logged out successfully",
+  });
+};

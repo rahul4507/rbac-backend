@@ -43,7 +43,7 @@ exports.getAllUser = catchAsync(async (req, res, next) => {
 
 // Reading a single user by userId
 exports.getUser = catchAsync(async (req, res, next) => {
-  const user = await User.findById(req.params.userId);
+  const user = await User.findById(req.params.userId).populate("role");
 
   if (!user) {
     return next(new AppError("No user found", 404));
@@ -59,7 +59,29 @@ exports.getUser = catchAsync(async (req, res, next) => {
 
 // Creating user
 exports.createUser = catchAsync(async (req, res, next) => {
+  const { type, masterEmail } = req.body;
+
+  // If the user type is "User", validate the masterEmail
+  if (type === "User" && !masterEmail) {
+    return next(new AppError("Master email is required for users", 400));
+  }
+
+  // If masterEmail is provided, validate that it exists as an admin or supervisor
+  if (masterEmail) {
+    const master = await User.findOne({ email: masterEmail, type: "Admin" });
+    if (!master) {
+      return next(
+        new AppError(
+          "Master email must belong to a valid admin or supervisor.",
+          400
+        )
+      );
+    }
+  }
+
+  // Create the user
   const newUser = await User.create(req.body);
+
   res.status(201).json({
     status: "success",
     data: {
@@ -70,6 +92,27 @@ exports.createUser = catchAsync(async (req, res, next) => {
 
 // Updating user
 exports.updateUser = catchAsync(async (req, res, next) => {
+  const { type, masterEmail } = req.body;
+
+  // If the user type is "User", validate the masterEmail
+  if (type === "User" && !masterEmail) {
+    return next(new AppError("Master email is required for users", 400));
+  }
+
+  // If masterEmail is provided, validate that it exists as an admin or supervisor
+  if (masterEmail) {
+    const master = await User.findOne({ email: masterEmail, type: "Admin" });
+    if (!master) {
+      return next(
+        new AppError(
+          "Master email must belong to a valid admin or supervisor.",
+          400
+        )
+      );
+    }
+  }
+
+  // Update the user
   const user = await User.findByIdAndUpdate(req.params.userId, req.body, {
     new: true,
     runValidators: true,

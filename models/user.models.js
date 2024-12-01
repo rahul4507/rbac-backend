@@ -49,6 +49,28 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    masterEmail: {
+      type: String,
+      required: function () {
+        // Only required for Users
+        return this.type === "User";
+      },
+      validate: [
+        {
+          validator: async function (email) {
+            if (this.type === "User") {
+              const user = await mongoose.models.User.findOne({ email });
+              if (!user) {
+                throw new Error(
+                  "Master email must belong to a valid admin or supervisor."
+                );
+              }
+            }
+          },
+          message: "Invalid master email.",
+        },
+      ],
+    },
   },
   {
     timestamps: true,
