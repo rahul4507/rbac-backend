@@ -1,106 +1,117 @@
-
-const Role = require('./../models/role.models');
-const APIFeatures = require('./../utils/apiFeatures.utils');
-const AppError = require('./../utils/appError.utils');
-const catchAsync = require('./../utils/catchAsync.utils');
+const Role = require("./../models/role.models");
+const APIFeatures = require("./../utils/apiFeatures.utils");
+const AppError = require("./../utils/appError.utils");
+const catchAsync = require("./../utils/catchAsync.utils");
 
 // Get all roles
 exports.getAllRole = catchAsync(async (req, res, next) => {
-    // Build the query
-    const apiFeatures = new APIFeatures(Role.find(), req.query)
-        .search() 
-        .filter()
-        .sort()
-        .limitFields()
-        .paginate();
+  // Build the query
+  const apiFeatures = new APIFeatures(Role.find(), req.query)
+    .search()
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
 
-    // Execute the query
-    const roles = await apiFeatures.query;
+  // Execute the query
+  const roles = await apiFeatures.query;
 
-    // Send the response
-    res.status(200).json({
-        status: 'success',
-        results: roles.length,
-        data: {
-            roles,
-        },
-    });
+  // Send the response
+  res.status(200).json({
+    status: "success",
+    results: roles.length,
+    data: {
+      roles,
+    },
+  });
 });
 
-
-// Get all active roles 
+// Get all active roles
 exports.getActiveRoles = catchAsync(async (req, res, next) => {
-    const activeRoles = await Role.find({ is_active: true }).sort('name');
+  const activeRoles = await Role.find({ is_active: true }).sort("name");
 
-    if (!activeRoles.length) {
-        return next(new AppError('No active roles found', 404));
-    }
+  if (!activeRoles.length) {
+    return next(new AppError("No active roles found", 404));
+  }
 
-    res.status(200).json({
-        status: 'success',
-        results: activeRoles.length,
-        data: {
-            roles: activeRoles
-        }
-    });
+  res.status(200).json({
+    status: "success",
+    results: activeRoles.length,
+    data: {
+      roles: activeRoles,
+    },
+  });
 });
 
-// Reading a single role by roleId 
+// Reading a single role by roleId
 exports.getRole = catchAsync(async (req, res, next) => {
-    const role = await Role.findById(req.params.roleId);
+  // Fetch role and populate module details
+  const role = await Role.findById(req.params.roleId).populate({
+    path: "modules",
+    select: "name description", // Select only required fields
+  });
 
-    if (!role) {
-        return next(new AppError('No role found', 404));
-    }
+  if (!role) {
+    return next(new AppError("No role found", 404));
+  }
 
-    res.status(200).json({
-        status: 'success',
-        data: {
-            role
-        }
-    });
+  // Transform modules to required structure
+  const modulesDetails = role.modules.map((module) => ({
+    name: module.name,
+    desc: module.description,
+  }));
+
+  res.status(200).json({
+    status: "success",
+    data: {
+      role: {
+        ...role.toObject(), // Convert Mongoose document to plain object
+        modules_details: modulesDetails, // Add the transformed details
+      },
+    },
+  });
 });
 
 // Creating role
 exports.createRole = catchAsync(async (req, res, next) => {
-    const newRole = await Role.create(req.body);
-    res.status(201).json({
-        status: 'success',
-        data: {
-            role: newRole
-        }
-    });
+  const newRole = await Role.create(req.body);
+  res.status(201).json({
+    status: "success",
+    data: {
+      role: newRole,
+    },
+  });
 });
 
 // Updating role
 exports.updateRole = catchAsync(async (req, res, next) => {
-    const role = await Role.findByIdAndUpdate(req.params.roleId, req.body, {
-        new: true,
-        runValidators: true
-    });
+  const role = await Role.findByIdAndUpdate(req.params.roleId, req.body, {
+    new: true,
+    runValidators: true,
+  });
 
-    if (!role) {
-        return next(new AppError('No role found', 404));
-    }
+  if (!role) {
+    return next(new AppError("No role found", 404));
+  }
 
-    res.status(200).json({
-        status: 'success',
-        data: {
-            role
-        }
-    });
+  res.status(200).json({
+    status: "success",
+    data: {
+      role,
+    },
+  });
 });
 
 // Deleting role
 exports.deleteRole = catchAsync(async (req, res, next) => {
-    const role = await Role.findByIdAndDelete(req.params.roleId);
+  const role = await Role.findByIdAndDelete(req.params.roleId);
 
-    if (!role) {
-        return next(new AppError('No role found', 404));
-    }
+  if (!role) {
+    return next(new AppError("No role found", 404));
+  }
 
-    res.status(200).json({
-        status: 'success',
-        data: null
-    });
+  res.status(200).json({
+    status: "success",
+    data: null,
+  });
 });
